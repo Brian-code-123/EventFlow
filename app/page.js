@@ -94,7 +94,7 @@ export default function Home() {
                             <ArrowRight className="w-5 h-5" />
                         </Link>
                         <Link
-                            href="https://github.com/rudra-iitm/eventflow"
+                            href="https://github.com/R3ACTR/EventFlow"
                             target="_blank"
                             className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-slate-900 text-white rounded-xl font-semibold text-lg hover:bg-slate-800 transition"
                         >
@@ -285,7 +285,7 @@ export default function Home() {
                                 Events
                             </Link>
                             <Link
-                                href="https://github.com/rudra-iitm/eventflow"
+                                href="https://github.com/R3ACTR/EventFlow"
                                 target="_blank"
                                 className="hover:text-white transition"
                             >
