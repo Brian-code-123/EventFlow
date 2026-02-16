@@ -13,6 +13,36 @@ import './AdminDashboard.css';
 export default function AdminDashboard({ userId, role }) {
     const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState(null);
+      useEffect(() => {
+    async function fetchDashboardData() {
+      try {
+        await new Promise((resolve) => setTimeout(resolve, 1500));
+
+        setStats({
+          totalUsers: 120,
+          activeSessions: 34,
+          newRegistrations: 8,
+          totalEvents: 15,
+          upcomingEvents: 5,
+          completedEvents: 10,
+          lastBackup: "Today 02:00 AM"
+        });
+
+      } catch (error) {
+        console.error("Failed to load dashboard data", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchDashboardData();
+  }, []);
+
+      if (loading) {
+    return <Loader size="lg" />;
+  }
+
+
   return (
     <div className="admin-dashboard">
       <div className="dashboard-header">
