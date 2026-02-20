@@ -1,22 +1,26 @@
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/db-connect";
 import Team from "@/models/Team";
+import { auth } from "@/auth";
 
 // LEAVE a team
 export async function POST(request) {
   try {
     await dbConnect();
-    const body = await request.json();
-    const { userId, teamId } = body;
-    
-    // Validate required fields
-    if (!userId) {
+    const session = await auth();
+
+    if (!session || !session.user) {
       return NextResponse.json(
-        { error: "User ID is required" },
-        { status: 400 }
+        { error: "Unauthorized" },
+        { status: 401 }
       );
     }
+
+    const body = await request.json();
+    const { teamId } = body;
+    const userId = session.user.id;
     
+    // Validate required fields
     if (!teamId) {
       return NextResponse.json(
         { error: "Team ID is required" },
@@ -72,13 +76,22 @@ export async function POST(request) {
 export async function DELETE(request) {
   try {
     await dbConnect();
+    const session = await auth();
+
+    if (!session || !session.user) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
     const teamId = searchParams.get('teamId');
-    const userId = searchParams.get('userId');
+    const userId = session.user.id;
     
-    if (!teamId || !userId) {
+    if (!teamId) {
       return NextResponse.json(
-        { error: "Team ID and User ID are required" },
+        { error: "Team ID is required" },
         { status: 400 }
       );
     }

@@ -2,12 +2,20 @@ import { NextResponse } from "next/server";
 import mongoose from "mongoose";
 import dbConnect from "@/lib/db-connect";
 import Event from "@/models/Event";
+import { auth } from "@/auth";
 
 export async function POST(req, { params }) {
   try {
     await dbConnect();
+    const session = await auth();
+    const { id } = await params;
 
-    const { id } = params;
+    if (!session || (session.user.role !== "admin" && session.user.role !== "organizer")) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 403 }
+      );
+    }
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json(
@@ -25,13 +33,21 @@ export async function POST(req, { params }) {
       );
     }
 
+    // Only allow cloning if you are the organizer or an admin
+    if (session.user.role !== "admin" && original.organizer && original.organizer.toString() !== session.user.id) {
+       return NextResponse.json(
+        { error: "You can only clone your own events" },
+        { status: 403 }
+      );
+    }
+
     const cloned = await Event.create({
       title: original.title + " (Copy)",
       description: original.description,
       startDate: original.startDate,
       endDate: original.endDate,
       registrationDeadline: original.registrationDeadline,
-      organizer: original.organizer,
+      organizer: session.user.id, // Set the current user as the organizer of the clone
       status: "draft",
       rules: original.rules,
       tracks: original.tracks,

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/db-connect";
 import Event from "@/models/Event";
+import { auth } from "@/auth";
 
 const demoEvents = [
   {
@@ -52,6 +53,14 @@ const demoEvents = [
 export async function POST() {
   try {
     await dbConnect();
+    const session = await auth();
+
+    if (!session || session.user.role !== "admin") {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 403 }
+      );
+    }
     
     // Check if events already exist
     const existingCount = await Event.countDocuments();
@@ -61,7 +70,13 @@ export async function POST() {
     }
     
     // Create demo events
-    const createdEvents = await Event.insertMany(demoEvents);
+    // Add organizer if possible, defaulting to the admin running the seed
+    const eventsWithOrganizer = demoEvents.map(event => ({
+      ...event,
+      organizer: session.user.id
+    }));
+
+    const createdEvents = await Event.insertMany(eventsWithOrganizer);
     
     return NextResponse.json({ 
       message: `Created ${createdEvents.length} demo events`,
@@ -75,3 +90,4 @@ export async function POST() {
     );
   }
 }
+

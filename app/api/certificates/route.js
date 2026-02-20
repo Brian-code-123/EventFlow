@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import connectDB from "@/lib/db-connect";
 import Certificate from "@/models/Certificate";
 import Event from "@/models/Event";
+import { auth } from "@/auth";
 
 import PDFDocument from "pdfkit";
 import fs from "fs";
@@ -10,6 +11,14 @@ import path from "path";
 export async function POST(req) {
   try {
     await connectDB();
+    const session = await auth();
+
+    if (!session || (session.user.role !== "admin" && session.user.role !== "organizer")) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 403 }
+      );
+    }
 
     const body = await req.json();
     const { eventId, recipientName, recipientEmail, role } = body;
@@ -28,6 +37,14 @@ export async function POST(req) {
       return NextResponse.json(
         { error: "Event not found" },
         { status: 404 }
+      );
+    }
+
+    // Optional: Check if the user is the organizer of the event
+    if (session.user.role !== "admin" && event.organizer && event.organizer.toString() !== session.user.id) {
+       return NextResponse.json(
+        { error: "You are not authorized to generate certificates for this event" },
+        { status: 403 }
       );
     }
 

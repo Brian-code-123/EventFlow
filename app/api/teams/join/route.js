@@ -2,28 +2,50 @@ import { NextResponse } from "next/server";
 import dbConnect from "@/lib/db-connect";
 import Team from "@/models/Team";
 import User from "@/models/User";
+import { auth } from "@/auth";
+import { z } from "zod";
+import { rateLimit } from "@/lib/rate-limit";
+
+const limiter = rateLimit({
+    interval: 60 * 1000, // 1 minute
+});
+
+const joinTeamSchema = z.object({
+  inviteCode: z.string().min(1, "Invite code is required").trim(),
+});
 
 // JOIN a team using invite code
 export async function POST(request) {
+  const ip = request.headers.get("x-forwarded-for") || "anonymous";
+  const { isRateLimited } = limiter.check(10, ip); // 10 requests per minute per IP
+
+  if (isRateLimited) {
+      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+  }
+
   try {
     await dbConnect();
+    const session = await auth();
+
+    if (!session || !session.user) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
     const body = await request.json();
-    const { inviteCode, userId } = body;
-    
-    // Validate required fields
-    if (!inviteCode || !inviteCode.trim()) {
+    const validation = joinTeamSchema.safeParse(body);
+
+    if (!validation.success) {
       return NextResponse.json(
-        { error: "Invite code is required" },
+        { error: "Invalid input", details: validation.error.format() },
         { status: 400 }
       );
     }
     
-    if (!userId) {
-      return NextResponse.json(
-        { error: "User ID is required" },
-        { status: 400 }
-      );
-    }
+    const { inviteCode } = validation.data;
+    const userId = session.user.id;
     
     // Validate user exists and is a participant
     const user = await User.findById(userId);
@@ -137,3 +159,4 @@ export async function POST(request) {
     return NextResponse.json({ error: "Failed to join team" }, { status: 500 });
   }
 }
+
