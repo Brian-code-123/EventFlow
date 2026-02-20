@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { getPasswordStrength } from "@/utils/passwordStrength";
 
 export default function RegisterPage() {
     const [name, setName] = useState("");
@@ -228,3 +229,4 @@ export default function RegisterPage() {
         </div>
     );
 }
+
