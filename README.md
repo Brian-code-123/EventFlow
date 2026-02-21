@@ -153,8 +153,13 @@ Visit: http://localhost:3000
 ```
 
 Built with **Next.js 14 (App Router)**, **Tailwind CSS**, and **MongoDB**. The project uses a modular folder structure to separate concerns between auth, dashboards, and API logic.
+The app directory follows the Next.js 14 App Router architecture.
+
+The models directory contains Mongoose schemas defining database structure.
 
 Modular, role-based, and reusable by design.
+
+Utility functions, database connection logic, and shared helpers
 
 ---
 
@@ -190,6 +195,7 @@ See `LICENSE` for details.
 
 ⭐ Star the repo if you like it  
 🤝 Contributions are welcome  
+
 
 
 
