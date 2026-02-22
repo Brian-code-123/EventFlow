@@ -1,12 +1,14 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { useState, useEffect } from "react";
+import { useRef, useState, useEffect } from "react";
 import Link from "next/link";
 import { CheckCircle, AlertCircle, User, FileText, BarChart3, Trophy, Search, Users, Clock, Star, Eye, Calendar, MessageSquare, Save } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import JudgeDashboardClient from "./JudgeDashboardClient";
+import useFocusTrap from "@/components/common/useFocusTrap";
+import { handleTabListKeyDown } from "@/components/common/keyboardNavigation";
 
 export const dynamic = 'force-dynamic';
 
@@ -33,6 +35,18 @@ export default function JudgeDashboard() {
   const [feedback, setFeedback] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isReadOnly, setIsReadOnly] = useState(false);
+  const scoreModalRef = useRef(null);
+  const feedbackRef = useRef(null);
+
+  useFocusTrap({
+    isOpen: showScoreModal,
+    containerRef: scoreModalRef,
+    onClose: () => {
+      setShowScoreModal(false);
+      setSelectedSubmission(null);
+    },
+    initialFocusRef: feedbackRef,
+  });
 
   const fetchJudgeData = async () => {
     try {
@@ -263,9 +277,19 @@ export default function JudgeDashboard() {
         {/* Tabs */}
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 mb-6">
           <div className="border-b border-slate-200">
-            <div className="flex gap-8 px-6">
+            <div
+              className="flex gap-8 px-6"
+              role="tablist"
+              aria-label="Judge dashboard sections"
+              onKeyDown={handleTabListKeyDown}
+            >
               <button
                 onClick={() => setActiveTab("pending")}
+                id="judge-tab-pending"
+                role="tab"
+                aria-selected={activeTab === "pending"}
+                aria-controls="judge-tabpanel-pending"
+                tabIndex={activeTab === "pending" ? 0 : -1}
                 className={`py-4 border-b-2 font-medium transition-colors ${activeTab === "pending"
                   ? "border-blue-600 text-blue-600"
                   : "border-transparent text-slate-500 hover:text-slate-700"
@@ -275,6 +299,11 @@ export default function JudgeDashboard() {
               </button>
               <button
                 onClick={() => setActiveTab("completed")}
+                id="judge-tab-completed"
+                role="tab"
+                aria-selected={activeTab === "completed"}
+                aria-controls="judge-tabpanel-completed"
+                tabIndex={activeTab === "completed" ? 0 : -1}
                 className={`py-4 border-b-2 font-medium transition-colors ${activeTab === "completed"
                   ? "border-blue-600 text-blue-600"
                   : "border-transparent text-slate-500 hover:text-slate-700"
@@ -302,109 +331,121 @@ export default function JudgeDashboard() {
           {/* Content */}
           <div className="p-6">
             {activeTab === "pending" ? (
-              filteredSubmissions.length === 0 ? (
-                <div className="text-center py-12">
-                  <FileText className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-slate-900 mb-2">No pending reviews</h3>
-                  <p className="text-slate-500">All submissions have been evaluated.</p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {filteredSubmissions.map((submission) => (
-                    <div key={submission.id} className="p-4 border border-slate-200 rounded-xl hover:border-blue-300 transition-colors">
-                      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
-                            <h4 className="font-semibold text-slate-900">{submission.teamName}</h4>
-                            <span className="px-2 py-0.5 bg-amber-100 text-amber-700 text-xs font-medium rounded-full">
-                              {submission.event}
-                            </span>
-                          </div>
-                          <p className="text-slate-700 font-medium">{submission.projectName}</p>
-                          <p className="text-sm text-slate-500 mt-1 line-clamp-2">{submission.description}</p>
-                          <div className="flex items-center gap-4 mt-3 text-sm text-slate-400">
-                            <span className="flex items-center gap-1">
-                              <Users className="w-4 h-4" />
-                              {submission.members} members
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <Clock className="w-4 h-4" />
-                              {new Date(submission.submittedAt).toLocaleDateString()}
-                            </span>
-                          </div>
-                        </div>
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => handleOpenEvaluation(submission)}
-                            className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
-                          >
-                            <Star className="w-4 h-4" />
-                            Evaluate
-                          </button>
-                          <button className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 text-slate-700 rounded-lg font-medium hover:bg-slate-200 transition-colors">
-                            <Eye className="w-4 h-4" />
-                            View
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )
-            ) : (
-              filteredCompleted.length === 0 ? (
-                <div className="text-center py-12">
-                  <CheckCircle className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-slate-900 mb-2">No completed evaluations</h3>
-                  <p className="text-slate-500">Start reviewing pending submissions.</p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {filteredCompleted.map((evaluation) => (
-                    <div key={evaluation.id} className="p-4 border border-slate-200 rounded-xl">
-                      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
-                            <h4 className="font-semibold text-slate-900">{evaluation.teamName}</h4>
-                            <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${getScoreColor(evaluation.score)} bg-opacity-10`}>
-                              Score: {evaluation.score}
-                            </span>
-                          </div>
-                          <p className="text-slate-700 font-medium">{evaluation.projectName}</p>
-                          <div className="flex items-center gap-4 mt-3 text-sm text-slate-400">
-                            <span className="flex items-center gap-1">
-                              <Calendar className="w-4 h-4" />
-                              {new Date(evaluation.evaluatedAt).toLocaleDateString()}
-                            </span>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-4">
-                          <div className="text-center">
-                            <div className={`text-3xl font-bold ${getScoreColor(evaluation.score)}`}>
-                              {getScoreGrade(evaluation.score)}
+              <div
+                role="tabpanel"
+                id="judge-tabpanel-pending"
+                aria-labelledby="judge-tab-pending"
+              >
+                {filteredSubmissions.length === 0 ? (
+                  <div className="text-center py-12">
+                    <FileText className="w-16 h-16 text-slate-300 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-slate-900 mb-2">No pending reviews</h3>
+                    <p className="text-slate-500">All submissions have been evaluated.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {filteredSubmissions.map((submission) => (
+                      <div key={submission.id} className="p-4 border border-slate-200 rounded-xl hover:border-blue-300 transition-colors">
+                        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
+                              <h4 className="font-semibold text-slate-900">{submission.teamName}</h4>
+                              <span className="px-2 py-0.5 bg-amber-100 text-amber-700 text-xs font-medium rounded-full">
+                                {submission.event}
+                              </span>
                             </div>
-                            <p className="text-xs text-slate-500">Grade</p>
+                            <p className="text-slate-700 font-medium">{submission.projectName}</p>
+                            <p className="text-sm text-slate-500 mt-1 line-clamp-2">{submission.description}</p>
+                            <div className="flex items-center gap-4 mt-3 text-sm text-slate-400">
+                              <span className="flex items-center gap-1">
+                                <Users className="w-4 h-4" />
+                                {submission.members} members
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <Clock className="w-4 h-4" />
+                                {new Date(submission.submittedAt).toLocaleDateString()}
+                              </span>
+                            </div>
                           </div>
-                          <button
-                            onClick={() => handleViewEvaluation(evaluation)}
-                            className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 text-slate-700 rounded-lg font-medium hover:bg-slate-200 transition-colors"
-                          >
-                            <MessageSquare className="w-4 h-4" />
-                            View
-                          </button>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => handleOpenEvaluation(submission)}
+                              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
+                            >
+                              <Star className="w-4 h-4" />
+                              Evaluate
+                            </button>
+                            <button className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 text-slate-700 rounded-lg font-medium hover:bg-slate-200 transition-colors">
+                              <Eye className="w-4 h-4" />
+                              View
+                            </button>
+                          </div>
                         </div>
                       </div>
-                      {evaluation.feedback && (
-                        <div className="mt-3 pt-3 border-t border-slate-100">
-                          <p className="text-sm text-slate-600">
-                            <span className="font-medium">Feedback:</span> {evaluation.feedback}
-                          </p>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div
+                role="tabpanel"
+                id="judge-tabpanel-completed"
+                aria-labelledby="judge-tab-completed"
+              >
+                {filteredCompleted.length === 0 ? (
+                  <div className="text-center py-12">
+                    <CheckCircle className="w-16 h-16 text-slate-300 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-slate-900 mb-2">No completed evaluations</h3>
+                    <p className="text-slate-500">Start reviewing pending submissions.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {filteredCompleted.map((evaluation) => (
+                      <div key={evaluation.id} className="p-4 border border-slate-200 rounded-xl">
+                        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
+                              <h4 className="font-semibold text-slate-900">{evaluation.teamName}</h4>
+                              <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${getScoreColor(evaluation.score)} bg-opacity-10`}>
+                                Score: {evaluation.score}
+                              </span>
+                            </div>
+                            <p className="text-slate-700 font-medium">{evaluation.projectName}</p>
+                            <div className="flex items-center gap-4 mt-3 text-sm text-slate-400">
+                              <span className="flex items-center gap-1">
+                                <Calendar className="w-4 h-4" />
+                                {new Date(evaluation.evaluatedAt).toLocaleDateString()}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-4">
+                            <div className="text-center">
+                              <div className={`text-3xl font-bold ${getScoreColor(evaluation.score)}`}>
+                                {getScoreGrade(evaluation.score)}
+                              </div>
+                              <p className="text-xs text-slate-500">Grade</p>
+                            </div>
+                            <button
+                              onClick={() => handleViewEvaluation(evaluation)}
+                              className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 text-slate-700 rounded-lg font-medium hover:bg-slate-200 transition-colors"
+                            >
+                              <MessageSquare className="w-4 h-4" />
+                              View
+                            </button>
+                          </div>
                         </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )
+                        {evaluation.feedback && (
+                          <div className="mt-3 pt-3 border-t border-slate-100">
+                            <p className="text-sm text-slate-600">
+                              <span className="font-medium">Feedback:</span> {evaluation.feedback}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             )}
           </div>
         </div>
@@ -413,9 +454,16 @@ export default function JudgeDashboard() {
       {/* Score Modal */}
       {showScoreModal && selectedSubmission && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-xl max-w-lg w-full p-6 max-h-[90vh] overflow-y-auto">
+          <div
+            ref={scoreModalRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="judge-score-title"
+            tabIndex={-1}
+            className="bg-white rounded-xl shadow-xl max-w-lg w-full p-6 max-h-[90vh] overflow-y-auto"
+          >
             <div className="mb-6">
-              <h3 className="text-xl font-bold text-slate-900">
+              <h3 id="judge-score-title" className="text-xl font-bold text-slate-900">
                 {isReadOnly ? "Evaluation Details" : `Evaluate: ${selectedSubmission.teamName}`}
               </h3>
               <p className="text-slate-500">{selectedSubmission.projectName}</p>
@@ -477,6 +525,7 @@ export default function JudgeDashboard() {
                 value={feedback}
                 onChange={(e) => setFeedback(e.target.value)}
                 disabled={isReadOnly}
+                ref={feedbackRef}
                 className={`w-full px-4 py-2 text-black border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${isReadOnly ? 'bg-slate-50 text-slate-600' : ''}`}
                 placeholder={isReadOnly ? "No feedback provided." : "Provide constructive feedback..."}
                 rows={4}

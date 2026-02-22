@@ -1,6 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useRef, useState, useEffect } from "react";
+import useFocusTrap from "@/components/common/useFocusTrap";
+import { handleTabListKeyDown } from "@/components/common/keyboardNavigation";
 
 // Icons as simple SVG components
 const Icons = {
@@ -118,6 +120,8 @@ export default function AdminDashboardClient({ user }) {
   const [userPagination, setUserPagination] = useState({ page: 1, limit: 10, total: 0, totalPages: 0 });
   const [editingUser, setEditingUser] = useState(null);
   const [showUserEditModal, setShowUserEditModal] = useState(false);
+  const userModalRef = useRef(null);
+  const roleSelectRef = useRef(null);
 
   // Announcements State
   const [announcements, setAnnouncements] = useState([]);
@@ -505,6 +509,13 @@ export default function AdminDashboardClient({ user }) {
     { id: "announcements", label: "Announcements", icon: Icons.Megaphone },
   ];
 
+  useFocusTrap({
+    isOpen: showUserEditModal,
+    containerRef: userModalRef,
+    onClose: () => setShowUserEditModal(false),
+    initialFocusRef: roleSelectRef,
+  });
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-900 to-slate-800 p-6">
       {/* Header */}
@@ -514,11 +525,21 @@ export default function AdminDashboardClient({ user }) {
       </div>
 
       {/* Tabs Navigation */}
-      <div className="flex flex-wrap gap-2 mb-8 border-b border-slate-700/50 pb-4">
+      <div
+        className="flex flex-wrap gap-2 mb-8 border-b border-slate-700/50 pb-4"
+        role="tablist"
+        aria-label="Admin dashboard sections"
+        onKeyDown={handleTabListKeyDown}
+      >
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
+            id={`admin-tab-${tab.id}`}
+            role="tab"
+            aria-selected={activeTab === tab.id}
+            aria-controls={`admin-tabpanel-${tab.id}`}
+            tabIndex={activeTab === tab.id ? 0 : -1}
             className={`flex items-center gap-2 px-5 py-2.5 rounded-lg font-medium transition-all duration-200 ${
               activeTab === tab.id
                 ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/25"
@@ -533,7 +554,12 @@ export default function AdminDashboardClient({ user }) {
 
       {/* Overview Tab */}
       {activeTab === "overview" && (
-        <div className="space-y-6 animate-fadeIn">
+        <div
+          className="space-y-6 animate-fadeIn"
+          role="tabpanel"
+          id="admin-tabpanel-overview"
+          aria-labelledby="admin-tab-overview"
+        >
           {/* Stats Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <StatCard 
@@ -609,7 +635,12 @@ export default function AdminDashboardClient({ user }) {
 
       {/* Users Tab */}
       {activeTab === "users" && (
-        <div className="space-y-6 animate-fadeIn">
+        <div
+          className="space-y-6 animate-fadeIn"
+          role="tabpanel"
+          id="admin-tabpanel-users"
+          aria-labelledby="admin-tab-users"
+        >
           {/* Users Header */}
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
@@ -748,7 +779,12 @@ export default function AdminDashboardClient({ user }) {
 
       {/* Events Tab */}
       {activeTab === "events" && (
-        <div className="space-y-6 animate-fadeIn">
+        <div
+          className="space-y-6 animate-fadeIn"
+          role="tabpanel"
+          id="admin-tabpanel-events"
+          aria-labelledby="admin-tab-events"
+        >
           <div className="flex justify-between items-center">
             <div>
               <h2 className="text-xl font-semibold text-white">Event Management</h2>
@@ -967,7 +1003,12 @@ export default function AdminDashboardClient({ user }) {
 
       {/* Announcements Tab */}
       {activeTab === "announcements" && (
-        <div className="space-y-6 animate-fadeIn">
+        <div
+          className="space-y-6 animate-fadeIn"
+          role="tabpanel"
+          id="admin-tabpanel-announcements"
+          aria-labelledby="admin-tab-announcements"
+        >
           <div className="flex justify-between items-center">
             <div>
               <h2 className="text-xl font-semibold text-white">Announcements</h2>
@@ -1094,8 +1135,15 @@ export default function AdminDashboardClient({ user }) {
       {/* User Edit Modal */}
       {showUserEditModal && editingUser && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-slate-800 border border-slate-700 rounded-2xl p-6 w-full max-w-md">
-            <h3 className="text-xl font-bold text-white mb-6">Edit User Role</h3>
+          <div
+            ref={userModalRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="admin-user-edit-title"
+            tabIndex={-1}
+            className="bg-slate-800 border border-slate-700 rounded-2xl p-6 w-full max-w-md"
+          >
+            <h3 id="admin-user-edit-title" className="text-xl font-bold text-white mb-6">Edit User Role</h3>
             
             <div className="space-y-4">
               <div>
@@ -1111,6 +1159,7 @@ export default function AdminDashboardClient({ user }) {
                 <select
                   defaultValue={editingUser.role}
                   onChange={(e) => handleUpdateUserRole(editingUser._id, e.target.value)}
+                  ref={roleSelectRef}
                   className="w-full bg-slate-900/50 border border-slate-600/50 rounded-lg p-3 text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
                 >
                   <option value="participant">Participant</option>

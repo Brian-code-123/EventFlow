@@ -1,6 +1,6 @@
 'use client';
 import { Input, Label } from "@/components/ui/form";
-import { useState, useEffect } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import {
@@ -16,6 +16,8 @@ import {
   LayoutGrid,
   Search
 } from "lucide-react";
+import useFocusTrap from "@/components/common/useFocusTrap";
+import { handleTabListKeyDown } from "@/components/common/keyboardNavigation";
 
 export default function ParticipantDashboard() {
   const { data: session, status } = useSession();
@@ -34,6 +36,24 @@ export default function ParticipantDashboard() {
   const [showJoinModal, setShowJoinModal] = useState(false);
   const [inviteCodeCopied, setInviteCodeCopied] = useState(false);
   const [notification, setNotification] = useState(null);
+  const createModalRef = useRef(null);
+  const joinModalRef = useRef(null);
+  const createTeamInputRef = useRef(null);
+  const joinCodeInputRef = useRef(null);
+
+  useFocusTrap({
+    isOpen: showCreateModal,
+    containerRef: createModalRef,
+    onClose: () => setShowCreateModal(false),
+    initialFocusRef: createTeamInputRef,
+  });
+
+  useFocusTrap({
+    isOpen: showJoinModal,
+    containerRef: joinModalRef,
+    onClose: () => setShowJoinModal(false),
+    initialFocusRef: joinCodeInputRef,
+  });
 
   // Form states
   const [newTeamName, setNewTeamName] = useState("");
@@ -194,9 +214,19 @@ export default function ParticipantDashboard() {
           </div>
 
           {/* Navigation Tabs */}
-          <div className="flex gap-8 mt-10">
+          <div
+            className="flex gap-8 mt-10"
+            role="tablist"
+            aria-label="Participant dashboard sections"
+            onKeyDown={handleTabListKeyDown}
+          >
             <button
               onClick={() => setActiveTab("browse")}
+              id="participant-tab-browse"
+              role="tab"
+              aria-selected={activeTab === "browse"}
+              aria-controls="participant-tabpanel-browse"
+              tabIndex={activeTab === "browse" ? 0 : -1}
               className={`pb-3 text-sm font-medium border-b-2 transition-colors flex items-center gap-2 ${activeTab === "browse" ? "border-white text-white" : "border-transparent text-blue-200 hover:text-white"
                 }`}
             >
@@ -205,6 +235,11 @@ export default function ParticipantDashboard() {
             </button>
             <button
               onClick={() => setActiveTab("joined")}
+              id="participant-tab-joined"
+              role="tab"
+              aria-selected={activeTab === "joined"}
+              aria-controls="participant-tabpanel-joined"
+              tabIndex={activeTab === "joined" ? 0 : -1}
               className={`pb-3 text-sm font-medium border-b-2 transition-colors flex items-center gap-2 ${activeTab === "joined" ? "border-white text-white" : "border-transparent text-blue-200 hover:text-white"
                 }`}
             >
@@ -224,7 +259,12 @@ export default function ParticipantDashboard() {
 
         {/* BROWSE / AVAILABLE EVENTS TAB */}
         {activeTab === "browse" && (
-          <div className="animate-in fade-in duration-300">
+          <div
+            className="animate-in fade-in duration-300"
+            role="tabpanel"
+            id="participant-tabpanel-browse"
+            aria-labelledby="participant-tab-browse"
+          >
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-bold text-slate-900">Upcoming Hackathons</h2>
             </div>
@@ -293,7 +333,12 @@ export default function ParticipantDashboard() {
 
         {/* MY HACKATHONS TAB */}
         {activeTab === "joined" && (
-          <div className="animate-in fade-in duration-300">
+          <div
+            className="animate-in fade-in duration-300"
+            role="tabpanel"
+            id="participant-tabpanel-joined"
+            aria-labelledby="participant-tab-joined"
+          >
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-bold text-slate-900">Participating Events</h2>
               <button
@@ -385,8 +430,15 @@ export default function ParticipantDashboard() {
       {/* Create Team Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6 animate-in fade-in zoom-in duration-200">
-            <h3 className="text-xl font-bold text-slate-900 mb-4">Create Team</h3>
+          <div
+            ref={createModalRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="create-team-title"
+            tabIndex={-1}
+            className="bg-white rounded-xl shadow-xl max-w-md w-full p-6 animate-in fade-in zoom-in duration-200"
+          >
+            <h3 id="create-team-title" className="text-xl font-bold text-slate-900 mb-4">Create Team</h3>
             <form onSubmit={handleCreateTeam}>
               <div className="mb-4">
                 <Label className="block text-sm font-medium text-slate-700 mb-2">Event</Label>
@@ -399,6 +451,7 @@ export default function ParticipantDashboard() {
                 <Input
                   value={newTeamName}
                   onChange={(e) => setNewTeamName(e.target.value)}
+                  ref={createTeamInputRef}
                   placeholder="e.g. Code Wizards"
                   required
                   className="focus:ring-2 focus:ring-blue-500"
@@ -416,14 +469,22 @@ export default function ParticipantDashboard() {
       {/* Join Team Modal */}
       {showJoinModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6 animate-in fade-in zoom-in duration-200">
-            <h3 className="text-xl font-bold text-slate-900 mb-4">Join a Team</h3>
+          <div
+            ref={joinModalRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="join-team-title"
+            tabIndex={-1}
+            className="bg-white rounded-xl shadow-xl max-w-md w-full p-6 animate-in fade-in zoom-in duration-200"
+          >
+            <h3 id="join-team-title" className="text-xl font-bold text-slate-900 mb-4">Join a Team</h3>
             <form onSubmit={handleJoinTeam}>
               <div className="mb-4">
                 <Label className="block text-sm font-medium text-slate-700 mb-2">Invite Code</Label>
                 <Input
                   value={joinCode}
                   onChange={(e) => setJoinCode(e.target.value)}
+                  ref={joinCodeInputRef}
                   placeholder="Enter 6-digit code"
                   required
                   className="focus:ring-2 focus:ring-blue-500"

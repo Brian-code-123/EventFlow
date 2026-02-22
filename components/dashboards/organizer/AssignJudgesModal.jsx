@@ -1,15 +1,27 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useRef, useState, useEffect } from "react";
 import { Search, Plus, Trash2, X } from "lucide-react";
 import Button from "@/components/common/Button";
+import useFocusTrap from "@/components/common/useFocusTrap";
+import { handleArrowListKeyDown } from "@/components/common/keyboardNavigation";
 
 export default function AssignJudgesModal({ event, onClose }) {
   const [judges, setJudges] = useState([]);
   const [assignedJudges, setAssignedJudges] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
+  const modalRef = useRef(null);
+  const searchInputRef = useRef(null);
+  const resultsRef = useRef(null);
+
+  useFocusTrap({
+    isOpen: true,
+    containerRef: modalRef,
+    onClose,
+    initialFocusRef: searchInputRef,
+  });
 
   useEffect(() => {
     fetchAssignedJudges();
@@ -92,10 +104,17 @@ export default function AssignJudgesModal({ event, onClose }) {
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-lg p-6">
+      <div
+        ref={modalRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="assign-judges-title"
+        tabIndex={-1}
+        className="bg-white rounded-xl shadow-xl w-full max-w-lg p-6"
+      >
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-bold text-slate-900">Assign Judges</h2>
-          <button onClick={onClose} className="text-slate-500 hover:text-slate-700">
+          <h2 id="assign-judges-title" className="text-xl font-bold text-slate-900">Assign Judges</h2>
+          <button onClick={onClose} className="text-slate-500 hover:text-slate-700" aria-label="Close assign judges dialog">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -108,6 +127,16 @@ export default function AssignJudgesModal({ event, onClose }) {
               type="text"
               value={searchQuery}
               onChange={handleSearch}
+              onKeyDown={(event) => {
+                if (event.key === "ArrowDown" && resultsRef.current) {
+                  const firstButton = resultsRef.current.querySelector("button:not([disabled])");
+                  if (firstButton) {
+                    firstButton.focus();
+                    event.preventDefault();
+                  }
+                }
+              }}
+              ref={searchInputRef}
               className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
               placeholder="Search by name or email..."
             />
@@ -115,7 +144,13 @@ export default function AssignJudgesModal({ event, onClose }) {
 
           {/* Search Results */}
           {judges.length > 0 && (
-            <div className="mt-2 border border-slate-200 rounded-lg divide-y divide-slate-100 max-h-48 overflow-y-auto">
+            <div
+              ref={resultsRef}
+              className="mt-2 border border-slate-200 rounded-lg divide-y divide-slate-100 max-h-48 overflow-y-auto"
+              onKeyDown={(event) => handleArrowListKeyDown(event, "button:not([disabled])")}
+              role="listbox"
+              aria-label="Judge search results"
+            >
               {judges.map((judge) => (
                 <div key={judge._id} className="p-3 flex items-center justify-between hover:bg-slate-50">
                   <div>
@@ -126,6 +161,7 @@ export default function AssignJudgesModal({ event, onClose }) {
                     onClick={() => assignJudge(judge._id)}
                     className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg"
                     disabled={assignedJudges.some(aj => aj._id === judge._id)}
+                    role="option"
                   >
                     {assignedJudges.some(aj => aj._id === judge._id) ? (
                         <span className="text-xs text-slate-400">Assigned</span>
