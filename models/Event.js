@@ -25,6 +25,10 @@ const EventSchema = new mongoose.Schema(
             type: Date,
             required: [true, "Registration deadline is required"]
         },
+        location: {
+            type: String,
+            default: "Virtual"
+        },
         logo: String,
         isPublic: { type: Boolean, default: true },
         organizer: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },

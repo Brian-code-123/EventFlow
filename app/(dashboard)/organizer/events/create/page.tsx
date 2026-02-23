@@ -34,6 +34,7 @@ export default function CreateEventPage() {
         startDate: "",
         endDate: "",
         registrationDeadline: "",
+        location: "",
         minTeamSize: 2,
         maxTeamSize: 4,
         rules: "",
@@ -104,6 +105,7 @@ export default function CreateEventPage() {
                     startDate: "",
                     endDate: "",
                     registrationDeadline: "",
+                    location: "",
                     minTeamSize: 2,
                     maxTeamSize: 4,
                     rules: "",
@@ -227,6 +229,18 @@ export default function CreateEventPage() {
                                     className="h-11"
                                 />
                                 <p className="text-xs text-slate-400 mt-1">Participants must register before this date.</p>
+                            </div>
+                            <div className="md:col-span-2">
+                                <Label className="mb-2 block text-sm font-semibold text-slate-700">Location</Label>
+                                <Input
+                                    type="text"
+                                    name="location"
+                                    value={formData.location}
+                                    onChange={handleChange}
+                                    placeholder="e.g., Virtual, San Francisco, CA, London, UK"
+                                    className="h-11"
+                                />
+                                <p className="text-xs text-slate-400 mt-1">Where the event will take place (leave empty for virtual events).</p>
                             </div>
                         </div>
                     </div>

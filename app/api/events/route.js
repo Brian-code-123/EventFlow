@@ -12,46 +12,51 @@ export async function GET(request) {
       return NextResponse.json({ events: [] }, { status: 200 }); // Graceful fallback
     }
 
-    // Default: Public upcoming/ongoing events
-    let query = { isPublic: true, status: { $in: ["upcoming", "ongoing"] } };
+    // Build query based on user role
+    let query = {};
+    const userRole = session?.user?.role;
+    const userId = session?.user?.id;
 
-    if (session?.user) {
-      const { role, id } = session.user;
+    // Admin sees all events
+    if (userRole === "admin") {
+      query = {};
+    }
+    // Organizer sees their events + public events
+    else if (userRole === "organizer") {
       const { searchParams } = new URL(request.url);
-      const view = searchParams.get("view"); // e.g., 'mine' for organizers
-
-      if (role === "admin") {
-        query = {}; // Admin sees all
-      } else if (role === "organizer") {
-        if (view === "mine") {
-          query = { organizer: id };
-        } else {
-          // Organizer sees their events OR public events
-          query = {
-            $or: [
-              { isPublic: true, status: { $in: ["upcoming", "ongoing"] } },
-              { organizer: id }
-            ]
-          };
-        }
-      } else if (role === "judge") {
-        // Judges see public events OR events they are assigned to
+      const view = searchParams.get("view");
+      if (view === "mine") {
+        query = { organizer: userId };
+      } else {
         query = {
           $or: [
             { isPublic: true, status: { $in: ["upcoming", "ongoing"] } },
-            { judges: id }
-          ]
-        };
-      } else if (role === "mentor") {
-        // Mentors see public events OR events they are assigned to
-        query = {
-          $or: [
-            { isPublic: true, status: { $in: ["upcoming", "ongoing"] } },
-            { mentors: id }
+            { organizer: userId }
           ]
         };
       }
-      // Add other roles logic if needed
+    }
+    // Judge sees public events + assigned events
+    else if (userRole === "judge") {
+      query = {
+        $or: [
+          { isPublic: true, status: { $in: ["upcoming", "ongoing"] } },
+          { judges: userId }
+        ]
+      };
+    }
+    // Mentor sees public events + assigned events
+    else if (userRole === "mentor") {
+      query = {
+        $or: [
+          { isPublic: true, status: { $in: ["upcoming", "ongoing"] } },
+          { mentors: userId }
+        ]
+      };
+    }
+    // Everyone else (participant or no role) sees public upcoming/ongoing events
+    else {
+      query = { isPublic: true, status: { $in: ["upcoming", "ongoing"] } };
     }
 
     const events = await Event.find(query)
@@ -85,6 +90,7 @@ export async function POST(request) {
       startDate,
       endDate,
       registrationDeadline,
+      location,
       minTeamSize,
       maxTeamSize,
       tracks,
@@ -105,6 +111,7 @@ export async function POST(request) {
       startDate,
       endDate,
       registrationDeadline,
+      location: location || "Virtual",
       organizer: session.user.id,
       minTeamSize: minTeamSize || 2,
       maxTeamSize: maxTeamSize || 4,
