@@ -127,7 +127,10 @@ export default function LoginPage() {
                 type="email"
                 placeholder="you@example.com"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+               onChange={(e) => {
+  setEmail(e.target.value);
+  if (error) setError(""); // ✅ clear error when user types
+}}
                 autoComplete="email"
                 required
                 aria-describedby={error ? "login-error" : undefined}
@@ -142,7 +145,10 @@ export default function LoginPage() {
                 type="password"
                 placeholder="••••••••"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+               onChange={(e) => {
+  setPassword(e.target.value);
+  if (error) setError(""); // ✅ clear error when user types
+}}
                 autoComplete="current-password"
                 required
                 aria-describedby={error ? "login-error" : undefined}
