@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Calendar, Users, Trophy, ArrowRight, Star, MapPin, Search, FilterX, Twitter, Linkedin, Facebook, MessageCircle, Link2, Check } from "lucide-react";
+import { Calendar, Users, Trophy, ArrowRight, Star, MapPin, Search, FilterX, Twitter, Linkedin, Facebook, MessageCircle, Link2, Check, CalendarPlus } from "lucide-react";
 import Navbar from "@/components/common/Navbar";
 import Aurora from "@/components/common/Aurora";
+import { downloadICS } from "@/utils/generateICS";
 
 export default function EventsPage() {
     const [events, setEvents] = useState([]);
@@ -81,6 +82,18 @@ export default function EventsPage() {
     const handleShareFacebook = (event) => {
         const url = encodeURIComponent(`${window.location.origin}/events/${event.id}`);
         window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, "_blank");
+    };
+
+    const handleAddToCalendar = (event, e) => {
+        e.stopPropagation();
+        downloadICS({
+            title: event.title,
+            description: event.description,
+            startDate: event.startDate,
+            endDate: event.endDate,
+            location: event.location,
+            registrationDeadline: event.registrationDeadline
+        }, `eventflow-${event.id}`);
     };
 
     const clearFilters = () => {
@@ -259,6 +272,13 @@ export default function EventsPage() {
                                     {/* Action Button & Share Icons */}
                                     <div className="flex flex-col gap-4">
                                         <div className="flex items-center justify-center gap-3 pt-4 border-t border-white/5">
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); handleAddToCalendar(event, e); }}
+                                                className="p-2 rounded-lg border border-white/10 hover:border-neon-cyan/50 hover:bg-neon-cyan/10 text-slate-400 hover:text-neon-cyan transition-all duration-300"
+                                                title="Add to Calendar"
+                                            >
+                                                <CalendarPlus className="w-4 h-4" />
+                                            </button>
                                             <button
                                                 onClick={(e) => { e.stopPropagation(); handleCopyLink(event.id); }}
                                                 className={`p-2 rounded-lg border transition-all duration-300 ${copiedId === event.id ? 'border-emerald-500/50 bg-emerald-500/10 text-emerald-400' : 'border-white/10 hover:border-white/30 text-slate-400 hover:text-white'}`}

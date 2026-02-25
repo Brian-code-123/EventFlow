@@ -4,8 +4,9 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { ArrowLeft, Calendar, Users, Clock, Check, Link2, Twitter, Linkedin, Facebook, MessageCircle } from "lucide-react";
+import { ArrowLeft, Calendar, Users, Clock, Check, Link2, Twitter, Linkedin, Facebook, MessageCircle, CalendarPlus } from "lucide-react";
 import CountdownTimer from "@/components/common/CountdownTimer";
+import { downloadICS } from "@/utils/generateICS";
 
 export default function EventDetailsPage() {
     const params = useParams();
@@ -49,6 +50,19 @@ export default function EventDetailsPage() {
     const handleShareFacebook = () => {
         const url = encodeURIComponent(window.location.href);
         window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, "_blank");
+    };
+
+    const handleAddToCalendar = () => {
+        if (event) {
+            downloadICS({
+                title: event.title,
+                description: event.description,
+                startDate: event.startDate,
+                endDate: event.endDate,
+                location: event.location || "Virtual",
+                registrationDeadline: event.registrationDeadline
+            }, `eventflow-${event._id}`);
+        }
     };
 
     useEffect(() => {
@@ -136,6 +150,14 @@ export default function EventDetailsPage() {
                         {/* Share This Event */}
                         <div className="flex items-center gap-3 mt-4 pt-4 border-t border-slate-100">
                             <span className="text-sm text-slate-500 font-medium">Share:</span>
+                            <button
+                                onClick={handleAddToCalendar}
+                                className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-700 hover:border-indigo-400 hover:bg-indigo-100 transition-colors shadow-sm"
+                                title="Add to Calendar"
+                            >
+                                <CalendarPlus className="w-4 h-4" />
+                                Add to Calendar
+                            </button>
                             <button
                                 onClick={handleCopyLink}
                                 className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-lg bg-white border border-slate-300 text-slate-700 hover:border-indigo-400 hover:text-indigo-600 transition-colors shadow-sm"
