@@ -28,12 +28,15 @@ export default function RegisterPage() {
   const [socialLoading, setSocialLoading] = useState(false);
 
   const handleChange = (e) => {
-    setFormData((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }));
-  };
+  setFormData((prev) => ({
+    ...prev,
+    [e.target.name]: e.target.value,
+  }));
 
+  if (status.error) {
+    setStatus((prev) => ({ ...prev, error: "" }));
+  }
+};
   const handleSubmit = async (e) => {
     e.preventDefault();
     setStatus({ error: "", success: "", loading: true });
