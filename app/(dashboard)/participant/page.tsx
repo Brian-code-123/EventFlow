@@ -15,7 +15,8 @@ import {
   User,
   LayoutGrid,
   Search,
-  ChevronRight
+  ChevronRight,
+  X
 } from "lucide-react";
 import TeamBoard from "@/components/dashboards/TeamBoard";
 import useFocusTrap from "@/components/common/useFocusTrap";
@@ -352,16 +353,27 @@ export default function ParticipantDashboard() {
               </div>
               <div className="flex items-center gap-3">
                 <label className="text-sm font-semibold text-slate-700">Select Event:</label>
-                <select 
-                  value={teamBoardEventId}
-                  onChange={(e) => setTeamBoardEventId(e.target.value)}
-                  className="bg-white border border-slate-200 rounded-lg px-4 py-2 text-sm font-medium focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none shadow-sm transition-all"
-                >
-                  <option value="">Choose an event...</option>
-                  {events.map(event => (
-                    <option key={event._id} value={event._id}>{event.title}</option>
-                  ))}
-                </select>
+                <div className="flex items-center gap-2">
+                  <select 
+                    value={teamBoardEventId}
+                    onChange={(e) => setTeamBoardEventId(e.target.value)}
+                    className="bg-white border border-slate-200 rounded-lg px-4 py-2 text-sm font-medium focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none shadow-sm transition-all"
+                  >
+                    <option value="">Choose an event...</option>
+                    {events.map(event => (
+                      <option key={event._id} value={event._id}>{event.title}</option>
+                    ))}
+                  </select>
+                  {teamBoardEventId && (
+                    <button
+                      onClick={() => setTeamBoardEventId("")}
+                      className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+                      title="Clear Filter"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
 

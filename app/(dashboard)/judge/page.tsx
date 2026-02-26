@@ -3,7 +3,7 @@
 import { useSession } from "next-auth/react";
 import { useRef, useState, useEffect } from "react";
 import Link from "next/link";
-import { CheckCircle, AlertCircle, User, FileText, BarChart3, Trophy, Search, Users, Clock, Star, Eye, Calendar, MessageSquare, Save } from "lucide-react";
+import { CheckCircle, AlertCircle, User, FileText, BarChart3, Trophy, Search, Users, Clock, Star, Eye, Calendar, MessageSquare, Save, X } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import JudgeDashboardClient from "./JudgeDashboardClient";
@@ -323,8 +323,17 @@ export default function JudgeDashboard() {
                 placeholder="Search by team or project name..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 rounded-lg border-2 focus:ring-2  text-sm text-black"
+                className="w-full pl-10 pr-10 py-2 rounded-lg border-2 focus:ring-2  text-sm text-black"
               />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                  title="Clear Search"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              )}
             </div>
           </div>
 

@@ -32,6 +32,11 @@ const Icons = {
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
     </svg>
   ),
+  X: () => (
+    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+    </svg>
+  ),
   Trash: () => (
     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -891,18 +896,32 @@ export default function AdminDashboardClient({ user }) {
                   </Tooltip>
                 </div>
               </div>
-              <select
-                value={userRoleFilter}
-                onChange={(e) => setUserRoleFilter(e.target.value)}
-                className="bg-slate-900/50 border border-slate-600/50 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
-              >
-                <option value="all">All Roles</option>
-                <option value="admin">Admin</option>
-                <option value="organizer">Organizer</option>
-                <option value="participant">Participant</option>
-                <option value="mentor">Mentor</option>
-                <option value="judge">Judge</option>
-              </select>
+              <div className="flex gap-4">
+                <select
+                  value={userRoleFilter}
+                  onChange={(e) => setUserRoleFilter(e.target.value)}
+                  className="bg-slate-900/50 border border-slate-600/50 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
+                >
+                  <option value="all">All Roles</option>
+                  <option value="admin">Admin</option>
+                  <option value="organizer">Organizer</option>
+                  <option value="participant">Participant</option>
+                  <option value="mentor">Mentor</option>
+                  <option value="judge">Judge</option>
+                </select>
+                {(userSearch || userRoleFilter !== "all") && (
+                  <button
+                    onClick={() => {
+                      setUserSearch("");
+                      setUserRoleFilter("all");
+                    }}
+                    className="flex items-center justify-center p-2.5 bg-slate-900/50 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-600/50 rounded-lg transition-colors"
+                    title="Clear Filters"
+                  >
+                    <Icons.X />
+                  </button>
+                )}
+              </div>
             </div>
           </div>
 
