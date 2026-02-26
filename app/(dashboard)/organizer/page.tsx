@@ -16,6 +16,7 @@ import {
     BarChart,
     Gavel
 } from "lucide-react";
+import Tooltip from "@/components/common/Tooltip";
 import OrganizerJudgeManager from "@/components/dashboards/organizer/OrganizerJudgeManager";
 import EmptyState from "@/components/common/EmptyState";
 import { Analytics } from "@/lib/analytics";
@@ -153,7 +154,9 @@ export default function OrganizerDashboard() {
                         <div className="flex items-center justify-between mb-4">
                             <p className="text-sm font-medium text-slate-500">Total Events</p>
                             <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                                <Calendar className="w-5 h-5 text-blue-600" />
+                                <Tooltip content="Track your hackathons">
+                                    <Calendar className="w-5 h-5 text-blue-600" />
+                                </Tooltip>
                             </div>
                         </div>
                         <p className="text-3xl font-bold text-slate-900">{events.length}</p>
@@ -163,7 +166,9 @@ export default function OrganizerDashboard() {
                         <div className="flex items-center justify-between mb-4">
                             <p className="text-sm font-medium text-slate-500">Participants</p>
                             <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center">
-                                <Users className="w-5 h-5 text-emerald-600" />
+                                <Tooltip content="Total participants across events">
+                                    <Users className="w-5 h-5 text-emerald-600" />
+                                </Tooltip>
                             </div>
                         </div>
                         <p className="text-3xl font-bold text-slate-900">{stats.totalParticipants}</p>
@@ -173,7 +178,9 @@ export default function OrganizerDashboard() {
                         <div className="flex items-center justify-between mb-4">
                             <p className="text-sm font-medium text-slate-500">Upcoming</p>
                             <div className="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
-                                <Clock className="w-5 h-5 text-amber-600" />
+                                <Tooltip content="Upcoming scheduled events">
+                                    <Clock className="w-5 h-5 text-amber-600" />
+                                </Tooltip>
                             </div>
                         </div>
                         <p className="text-3xl font-bold text-slate-900">
@@ -185,7 +192,9 @@ export default function OrganizerDashboard() {
                         <div className="flex items-center justify-between mb-4">
                             <p className="text-sm font-medium text-slate-500">Avg. Team Size</p>
                             <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                                <BarChart className="w-5 h-5 text-purple-600" />
+                                <Tooltip content="Average members per team">
+                                    <BarChart className="w-5 h-5 text-purple-600" />
+                                </Tooltip>
                             </div>
                         </div>
                         <p className="text-3xl font-bold text-slate-900">{stats.avgTeamSize}</p>
@@ -229,15 +238,21 @@ export default function OrganizerDashboard() {
                                             <p className="text-sm text-slate-500 mb-4 line-clamp-1 max-w-2xl">{event.description}</p>
                                             <div className="flex items-center gap-6 text-sm text-slate-500">
                                                 <div className="flex items-center gap-2">
-                                                    <Calendar className="w-4 h-4 text-slate-400" />
+                                                    <Tooltip content="Event Start Date">
+                                                        <Calendar className="w-4 h-4 text-slate-400" />
+                                                    </Tooltip>
                                                     <span>{new Date(event.startDate).toLocaleDateString()}</span>
                                                 </div>
                                                 <div className="flex items-center gap-2">
-                                                    <Users className="w-4 h-4 text-slate-400" />
+                                                    <Tooltip content="Max Team Size">
+                                                        <Users className="w-4 h-4 text-slate-400" />
+                                                    </Tooltip>
                                                     <span>{event.maxTeamSize} max members</span>
                                                 </div>
                                                 <div className="flex items-center gap-2">
-                                                    <Clock className="w-4 h-4 text-slate-400" />
+                                                    <Tooltip content="Event Duration">
+                                                        <Clock className="w-4 h-4 text-slate-400" />
+                                                    </Tooltip>
                                                     <span>48h Duration</span>
                                                 </div>
                                             </div>

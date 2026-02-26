@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect } from "react";
 import { Users, FileText, Calendar, Clock, ChevronRight, ExternalLink, AlertCircle } from "lucide-react";
 import Link from "next/link";
+import Tooltip from "@/components/common/Tooltip";
 
 export default function MentorDashboard() {
     const [teams, setTeams] = useState([]);
@@ -170,7 +170,9 @@ export default function MentorDashboard() {
                                 <p className="text-2xl font-bold text-slate-900 mt-1">{stats.assignedTeams}</p>
                             </div>
                             <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                                <Users className="w-6 h-6 text-blue-600" />
+                                <Tooltip content="Teams assigned to you">
+                                    <Users className="w-6 h-6 text-blue-600" />
+                                </Tooltip>
                             </div>
                         </div>
                     </div>
@@ -182,7 +184,9 @@ export default function MentorDashboard() {
                                 <p className="text-2xl font-bold text-slate-900 mt-1">{stats.pendingSubmissions}</p>
                             </div>
                             <div className="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center">
-                                <FileText className="w-6 h-6 text-amber-600" />
+                                <Tooltip content="Submissions awaiting your review">
+                                    <FileText className="w-6 h-6 text-amber-600" />
+                                </Tooltip>
                             </div>
                         </div>
                     </div>
@@ -194,7 +198,9 @@ export default function MentorDashboard() {
                                 <p className="text-2xl font-bold text-slate-900 mt-1">{stats.reviewedSubmissions}</p>
                             </div>
                             <div className="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center">
-                                <FileText className="w-6 h-6 text-emerald-600" />
+                                <Tooltip content="Submissions you have already reviewed">
+                                    <FileText className="w-6 h-6 text-emerald-600" />
+                                </Tooltip>
                             </div>
                         </div>
                     </div>
