@@ -3,6 +3,7 @@
 import React, { useRef, useState, useEffect } from "react";
 import useFocusTrap from "@/components/common/useFocusTrap";
 import { handleTabListKeyDown } from "@/components/common/keyboardNavigation";
+import Tooltip from "@/components/common/Tooltip";
 
 // Icons as simple SVG components
 const Icons = {
@@ -885,7 +886,9 @@ export default function AdminDashboardClient({ user }) {
                   className="w-full bg-slate-900/50 border border-slate-600/50 rounded-lg pl-10 pr-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
                 />
                 <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">
-                  <Icons.Search />
+                  <Tooltip content="Search Users" position="right">
+                    <Icons.Search />
+                  </Tooltip>
                 </div>
               </div>
               <select
@@ -947,20 +950,22 @@ export default function AdminDashboardClient({ user }) {
                         </td>
                         <td className="py-4 px-6 text-right">
                           <div className="flex items-center justify-end gap-2">
-                            <button
-                              onClick={() => handleEditUser(userItem)}
-                              className="p-2 text-slate-400 hover:text-indigo-400 hover:bg-indigo-500/10 rounded-lg transition-colors"
-                              title="Edit"
-                            >
-                              <Icons.Edit />
-                            </button>
-                            <button
-                              onClick={() => handleDeleteUser(userItem._id)}
-                              className="p-2 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
-                              title="Delete"
-                            >
-                              <Icons.Trash />
-                            </button>
+                            <Tooltip content="Edit User">
+                              <button
+                                onClick={() => handleEditUser(userItem)}
+                                className="p-2 text-slate-400 hover:text-indigo-400 hover:bg-indigo-500/10 rounded-lg transition-colors"
+                              >
+                                <Icons.Edit />
+                              </button>
+                            </Tooltip>
+                            <Tooltip content="Delete User">
+                              <button
+                                onClick={() => handleDeleteUser(userItem._id)}
+                                className="p-2 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                              >
+                                <Icons.Trash />
+                              </button>
+                            </Tooltip>
                           </div>
                         </td>
                       </tr>
@@ -1199,20 +1204,22 @@ export default function AdminDashboardClient({ user }) {
                         </td>
                         <td className="py-4 px-6 text-right">
                           <div className="flex items-center justify-end gap-2">
-                            <button
-                              onClick={() => handleEditEvent(event)}
-                              className="p-2 text-slate-400 hover:text-indigo-400 hover:bg-indigo-500/10 rounded-lg transition-colors"
-                              title="Edit"
-                            >
-                              <Icons.Edit />
-                            </button>
-                            <button
-                              onClick={() => handleDeleteEvent(event._id)}
-                              className="p-2 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
-                              title="Delete"
-                            >
-                              <Icons.Trash />
-                            </button>
+                            <Tooltip content="Edit Event">
+                              <button
+                                onClick={() => handleEditEvent(event)}
+                                className="p-2 text-slate-400 hover:text-indigo-400 hover:bg-indigo-500/10 rounded-lg transition-colors"
+                              >
+                                <Icons.Edit />
+                              </button>
+                            </Tooltip>
+                            <Tooltip content="Delete Event">
+                              <button
+                                onClick={() => handleDeleteEvent(event._id)}
+                                className="p-2 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                              >
+                                <Icons.Trash />
+                              </button>
+                            </Tooltip>
                           </div>
                         </td>
                       </tr>
@@ -1341,13 +1348,14 @@ export default function AdminDashboardClient({ user }) {
                         {ann.expiresAt && <span>Expires: {new Date(ann.expiresAt).toLocaleDateString()}</span>}
                       </div>
                     </div>
-                    <button
-                      onClick={() => handleDeleteAnnouncement(ann._id)}
-                      className="p-2 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors ml-4"
-                      title="Deactivate"
-                    >
-                      <Icons.Trash />
-                    </button>
+                    <Tooltip content="Deactivate Announcement" position="left">
+                      <button
+                        onClick={() => handleDeleteAnnouncement(ann._id)}
+                        className="p-2 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors ml-4"
+                      >
+                        <Icons.Trash />
+                      </button>
+                    </Tooltip>
                   </div>
                 ))
               )}

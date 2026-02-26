@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
 import { Bell, Users, Calendar, Clock, Copy, ExternalLink, Trophy, Plus, CheckCircle, XCircle, HandHelping } from "lucide-react";
 import Link from "next/link";
+import Tooltip from "@/components/common/Tooltip";
 
 interface User {
   id: string;
@@ -171,7 +171,9 @@ export default function ParticipantDashboardClient({ user }: Props) {
               <div className="bg-slate-800 p-6 rounded-lg shadow-lg border border-slate-700/50">
                   <div className="flex items-center justify-between mb-4">
                       <h2 className="text-xl font-bold flex items-center gap-2">
-                          <Users className="w-5 h-5 text-neon-cyan" />
+                          <Tooltip content="Teams you lead or have joined">
+                            <Users className="w-5 h-5 text-neon-cyan" />
+                          </Tooltip>
                           My Teams
                       </h2>
                       <Link href="/events" className="text-sm text-neon-cyan hover:text-white transition">
@@ -264,7 +266,9 @@ export default function ParticipantDashboardClient({ user }: Props) {
               {/* Submissions Section */}
               <div className="bg-slate-800 p-6 rounded-lg shadow-lg border border-slate-700/50">
                   <h2 className="text-xl font-bold flex items-center gap-2 mb-4">
-                      <Trophy className="w-5 h-5 text-neon-cyan" />
+                      <Tooltip content="Your overall hackathon progress">
+                        <Trophy className="w-5 h-5 text-neon-cyan" />
+                      </Tooltip>
                       My Submissions
                   </h2>
                   
@@ -322,7 +326,9 @@ export default function ParticipantDashboardClient({ user }: Props) {
               {/* Important Deadlines */}
               <div className="bg-slate-800 p-6 rounded-lg shadow-lg border border-slate-700/50">
                   <h2 className="text-xl font-bold flex items-center gap-2 mb-4">
-                      <Clock className="w-5 h-5 text-neon-cyan" />
+                      <Tooltip content="Important event deadlines">
+                        <Clock className="w-5 h-5 text-neon-cyan" />
+                      </Tooltip>
                       Important Deadlines
                   </h2>
                   
@@ -358,7 +364,9 @@ export default function ParticipantDashboardClient({ user }: Props) {
               {availableEvents.length > 0 && (
                   <div className="bg-slate-800 p-6 rounded-lg shadow-lg border border-slate-700/50">
                       <h2 className="text-xl font-bold flex items-center gap-2 mb-4">
-                          <Calendar className="w-5 h-5 text-neon-cyan" />
+                          <Tooltip content="Discover new hackathons">
+                            <Calendar className="w-5 h-5 text-neon-cyan" />
+                          </Tooltip>
                           Available Events
                       </h2>
                       
